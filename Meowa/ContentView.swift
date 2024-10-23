@@ -73,31 +73,37 @@ struct ContentView: View {
                 ProgressView().scaleEffect(2.0)
             } else {
                 Text("Meowa").font(.largeTitle).fontWeight(.bold)
-                List(allBreedsData, id: \.self) { breed in
-                    HStack{
-                        AsyncImage(url: {
-                            if let referenceImageID = breed.referenceImageID {
-                                return URL(string: "https://cdn2.thecatapi.com/images/\(referenceImageID).jpg")
-                            } else {
-                                return nil
+                
+                NavigationStack {
+                    
+                    List(allBreedsData, id: \.self) { cat in
+                        NavigationLink(destination: CatDetailsView(cat: cat)) {
+                            
+                            HStack {
+                                AsyncImage(url: {
+                                    if let referenceImageID = cat.referenceImageID {
+                                        return URL(string: "https://cdn2.thecatapi.com/images/\(referenceImageID).jpg")
+                                    } else {
+                                        return nil
+                                    }
+                                }()) { phase in
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 100, height: 100)
+                                            .cornerRadius(10)
+                                    } else if phase.error != nil {
+                                        Image(systemName: "photo.badge.exclamationmark.fill").frame(width: 100, height: 100)
+                                    } else {
+                                        ProgressView().frame(width: 100, height: 100)
+                                    }
+                                }
+                                VStack(alignment: .leading) {
+                                    Text(cat.name).font(.headline)
+                                    Text(cat.temperament).font(.subheadline)
+                                }
                             }
-                        }()) { phase in
-                            if let image = phase.image {
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 100, height: 100)
-                                    .cornerRadius(10)
-                            } else if phase.error != nil {
-                                Image(systemName: "photo.badge.exclamationmark.fill").frame(width: 100, height: 100)
-                            } else {
-                                ProgressView().frame(width: 100, height: 100)
-                            }
-                        }
-                        VStack(alignment: .leading) {
-                            Text(breed.name).font(.headline)
-                            Text(breed.temperament).font(.subheadline)
-                            Text(breed.origin).font(.subheadline)
                         }
                     }
                 }

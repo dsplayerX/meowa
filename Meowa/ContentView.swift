@@ -67,6 +67,17 @@ struct ContentView: View {
     @State var allBreedsData: [BreedDTO] = []
     @State var isLoading: Bool = true
     
+    @State var searchResults: [BreedDTO] = []
+    @State var searchQuery: String = ""
+
+    var filteredBreeds: [BreedDTO] {
+            if searchQuery.isEmpty {
+                return allBreedsData
+            } else {
+                return searchResults
+            }
+        }
+    
     var body: some View {
         VStack {
             if isLoading {
@@ -75,8 +86,7 @@ struct ContentView: View {
                 Text("Meowa").font(.largeTitle).fontWeight(.bold)
                 
                 NavigationStack {
-                    
-                    List(allBreedsData, id: \.self) { cat in
+                    List(filteredBreeds, id: \.self) { cat in
                         NavigationLink(destination: CatDetailsView(cat: cat)) {
                             
                             HStack {
@@ -105,6 +115,29 @@ struct ContentView: View {
                                 }
                             }
                         }
+                    }
+                }.listStyle(PlainListStyle())
+                /// Search UI
+                .searchable(
+                        text: $searchQuery,
+                          placement: .automatic,
+                          prompt: "Search for a cat"
+                      )
+                .textInputAutocapitalization(.never)
+                
+                /// Filtering
+                .onChange(of: searchQuery) {
+                    self.fetchSearchResults(for: searchQuery)
+                }
+                
+                /// Search empty state
+                .overlay {
+                    if filteredBreeds.isEmpty {
+                        ContentUnavailableView(
+                            "Cat missing!",
+                            systemImage: "magnifyingglass",
+                            description: Text("No results for **\\(searchQuery)**")
+                        )
                     }
                 }
             }
@@ -148,6 +181,14 @@ struct ContentView: View {
             isLoading = false
         }
     }
+    
+    private func fetchSearchResults(for query: String) {
+            searchResults = allBreedsData.filter { cat in
+                cat.name
+                    .lowercased()
+                    .contains(searchQuery)
+            }
+        }
 }
 
 

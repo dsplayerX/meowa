@@ -40,6 +40,8 @@ struct CatDetailsView: View {
                 Text("Weight(kg): \(cat.weight.metric)").font(.body)
                 Text("Life Span(years): \(cat.lifeSpan)").font(.body)
                 
+                
+                
             }.padding()
             
             
